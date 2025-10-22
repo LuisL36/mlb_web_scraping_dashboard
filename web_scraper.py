@@ -33,4 +33,4 @@ driver.quit()
 # Save to CSV
 df = pd.DataFrame({'year': years, 'link': links})
 df.to_csv("data/mlb_yearly_events.csv", index=False)
-print("Saved data/mlb_yearly_events.csv")
+print("✅ Saved data/mlb_yearly_events.csv")
