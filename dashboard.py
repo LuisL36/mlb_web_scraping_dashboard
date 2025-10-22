@@ -27,15 +27,12 @@ st.write("Explore historical baseball data scraped from Baseball Almanac.")
 years = sorted(df["year"].unique())
 selected_year = st.selectbox("Select Year:", years)
 
-# Chart 1: Events for selected year
-fig1 = px.bar(
-    event_counts[event_counts["year"] == selected_year],
-    x="year",
-    y="count",
-    title=f"Number of MLB Events in {selected_year}"
-)
-fig1.update_layout(xaxis_title="Year", yaxis_title="Event Count")
-st.plotly_chart(fig1, use_container_width=True)
+# Display Almanac link for selected year
+selected_link = df[df["year"] == selected_year]["link"].values[0]
+st.subheader(f"MLB Almanac Page for {selected_year}")
+st.markdown(f"📎 [Open Baseball Almanac Page]({selected_link})")
+
+# Chart 1 (was previously): replaced with link
 
 # Chart 2: Histogram of recorded years
 fig2 = px.histogram(
@@ -58,11 +55,5 @@ fig3 = px.line(
 )
 fig3.update_layout(xaxis_title="Year", yaxis_title="Cumulative Count")
 st.plotly_chart(fig3, use_container_width=True)
-
-# Clickable link to Almanac page
-selected_link = df[df["year"] == selected_year]["link"].values[0]
-st.markdown(
-    f"📎 [Open Baseball Almanac Page for {selected_year}]({selected_link})"
-)
 
 st.success("✅ Dashboard ready!")
