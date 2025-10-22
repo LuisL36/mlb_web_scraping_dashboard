@@ -5,11 +5,12 @@ from selenium.common.exceptions import TimeoutException
 import pandas as pd
 import time
 
-# Headless Chrome setup
+# Configure headless browser
 options = Options()
 options.add_argument("--headless")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
+
 driver = webdriver.Chrome(options=options)
 driver.set_page_load_timeout(10)
 
@@ -32,18 +33,21 @@ for row in rows:
     except Exception:
         continue
 
-print(f"✅ Found {len(years)} yearly links to scrape.")
+# Step 2: Filter years to 1950–1980
+year_links = [(int(y), l) for y, l in zip(years, links)]
+year_links = [(y, l) for y, l in year_links if 1950 <= y <= 1980]
+print(f"✅ Found {len(year_links)} years to scrape (1950–1980).")
 
-# Step 2: Scrape each year's stat tables
+# Step 3: Scrape each year's stat table
 data = []
 
-for i, (year, link) in enumerate(zip(years, links), 1):
-    print(f"[{i}/{len(years)}] Scraping year {year} ...", end=" ")
+for i, (year, link) in enumerate(year_links, 1):
+    print(f"[{i}/{len(year_links)}] Scraping year {year} ...", end=" ")
     try:
         driver.get(link)
         driver.implicitly_wait(5)
 
-        # Find all rows in stat tables
+        # Select all rows in the stat leader tables
         rows = driver.find_elements(By.CSS_SELECTOR, "div.ba-table table.boxed tbody tr")
         if not rows:
             print("No data found.")
@@ -57,7 +61,7 @@ for i, (year, link) in enumerate(zip(years, links), 1):
                 team = cells[2].text.strip()
                 value = cells[3].text.strip()
 
-                # Optional: grab stat link
+                # Optional: get stat link if available
                 try:
                     stat_link = cells[0].find_element(By.TAG_NAME, "a").get_attribute("href")
                 except Exception:
@@ -73,6 +77,8 @@ for i, (year, link) in enumerate(zip(years, links), 1):
                 })
 
         print(f"✅ {len(rows)} rows scraped.")
+        time.sleep(0.5)  # polite delay
+
     except TimeoutException:
         print("⏳ Timeout — skipping")
         continue
@@ -82,7 +88,7 @@ for i, (year, link) in enumerate(zip(years, links), 1):
 
 driver.quit()
 
-# Step 3: Save data to CSV
+# Step 4: Save to CSV
 df = pd.DataFrame(data)
 df.to_csv("mlb_stat_leaders.csv", index=False)
 print(f"📄 Saved {len(df)} stat rows to mlb_stat_leaders.csv")
