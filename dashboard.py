@@ -36,13 +36,10 @@ junk_keywords = ["Statistic", "Stat", "Stats", "Statistics"]
 def is_team_or_garbage(stat_name: str):
     if not isinstance(stat_name, str) or stat_name.strip() == "":
         return True
-    # Filter out common junk labels
     if stat_name.strip().title() in junk_keywords:
         return True
-    # Too long (team names often are long)
     if len(stat_name) > 30:
         return True
-    # Check for team names
     for kw in team_keywords:
         if kw.lower() in stat_name.lower():
             return True
@@ -50,20 +47,9 @@ def is_team_or_garbage(stat_name: str):
 
 # Clean dataframe globally
 clean_df = df[~df["stat"].apply(is_team_or_garbage)]
-filtered_stats = year_data[~year_data["stat"].apply(is_team_or_garbage)]
 
-# Chart 1: Clean Stat Categories for selected year
-top_stats = filtered_stats.groupby("stat").size().reset_index(name="count")
-fig1 = px.bar(
-    top_stats.sort_values("count", ascending=False),
-    x="stat",
-    y="count",
-    title=f"📊 Stat Categories in {selected_year}",
-)
-fig1.update_layout(xaxis_title="Stat Category", yaxis_title="Occurrences", xaxis_tickangle=45)
-st.plotly_chart(fig1, use_container_width=True)
 
-# Chart 2: Number of stats recorded each year
+# Chart 1: Number of stats recorded each year
 year_counts = clean_df.groupby("year").size().reset_index(name="num_stats")
 fig2 = px.line(
     year_counts,
@@ -75,7 +61,7 @@ fig2 = px.line(
 fig2.update_layout(xaxis_title="Year", yaxis_title="Number of Stat Records")
 st.plotly_chart(fig2, use_container_width=True)
 
-# Chart 3: Most common stat categories overall (cleaned)
+# Chart 2: Most common stat categories overall
 top_categories = clean_df["stat"].value_counts().reset_index()
 top_categories.columns = ["stat", "total_count"]
 fig3 = px.bar(
